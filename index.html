@@ -334,6 +334,35 @@
       .todo-row:last-child { border-bottom: 0; }
       .todo-row:active { border-radius: 10px; background: rgba(109, 156, 175, 0.08); }
 
+      .todo-item {
+        display: flex;
+        align-items: stretch;
+        min-width: 0;
+      }
+
+      .todo-item .todo-row { flex: 1; min-width: 0; }
+
+      .delete-item {
+        flex: 0 0 auto;
+        align-self: center;
+        width: 32px;
+        height: 32px;
+        margin: 0 2px 0 4px;
+        padding: 0;
+        border: 0;
+        border-radius: 10px;
+        color: #a3aaa7;
+        background: transparent;
+        cursor: pointer;
+        transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+      }
+
+      .delete-item svg { width: 16px; height: 16px; }
+      .delete-item:hover,
+      .delete-item:focus-visible { color: var(--orange); background: rgba(216, 120, 79, 0.12); }
+      .delete-item:active { transform: scale(0.92); }
+      .delete-item:focus-visible { outline: 3px solid rgba(216, 120, 79, 0.25); outline-offset: 2px; }
+
       .todo-row input {
         position: absolute;
         width: 1px;
@@ -644,16 +673,17 @@
         `;
       }
 
-      function renderTodo(item) {
+      function renderTodo(item, canDelete = false) {
         const checked = Boolean(state.checked[item.id]);
         return `
-          <li>
+          <li class="${canDelete ? "todo-item" : ""}">
             <label class="todo-row">
               <input type="checkbox" data-todo-id="${escapeHtml(item.id)}" ${checked ? "checked" : ""} />
               <span class="checkmark" aria-hidden="true"></span>
               <span class="todo-name">${escapeHtml(item.name)}</span>
               ${item.meta ? `<span class="todo-meta">${escapeHtml(item.meta)}</span>` : ""}
             </label>
+            ${canDelete ? `<button class="delete-item" type="button" data-delete-id="${escapeHtml(item.id)}" aria-label="删除${escapeHtml(item.name)}" title="删除此项"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7l1-3h4l1 3" /></svg></button>` : ""}
           </li>
         `;
       }
@@ -674,7 +704,7 @@
             <span class="section-number">＋</span>
             <span class="section-count">${completed} / ${state.custom.length} 已完成</span>
           </div>
-          <ul class="checklist">${state.custom.map((item) => renderTodo(item)).join("")}</ul>
+          <ul class="checklist">${state.custom.map((item) => renderTodo(item, true)).join("")}</ul>
         `;
       }
 
@@ -713,6 +743,20 @@
         saveState();
         render();
         if (checkbox.checked) showToast("已勾选，记得装进行李箱");
+      });
+
+      document.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-delete-id]");
+        if (!button) return;
+        const id = button.dataset.deleteId;
+        const item = state.custom.find((customItem) => customItem.id === id);
+        if (!item) return;
+        if (!window.confirm(`要删除临时事项“${item.name}”吗？`)) return;
+        state.custom = state.custom.filter((customItem) => customItem.id !== id);
+        delete state.checked[id];
+        saveState();
+        render();
+        showToast("已删除临时事项");
       });
 
       document.getElementById("quickAddForm").addEventListener("submit", (event) => {
