@@ -15,7 +15,7 @@
 ## 发布到 GitHub Pages
 
 1. 在 GitHub 新建一个仓库，例如 `travel-todolist`。
-2. 上传本文件夹里的 `index.html` 和 `README.md`。
+2. 上传本文件夹里的 `index.html`、`README.md` 和 `logo.png`。
 3. 打开仓库的 **Settings → Pages**。
 4. 在 **Build and deployment** 中选择 **Deploy from a branch**，分支选 `main`，目录选 `/ (root)`，保存。
 5. 等待 GitHub Pages 发布后，会得到一个类似 `https://你的用户名.github.io/travel-todolist/` 的地址。
